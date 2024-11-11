@@ -15,6 +15,33 @@ static void free_printed_paths(bool **printed_paths, int num_vertices) {
     free(printed_paths);
 }
 
+t_parent_list **initialize_parents(int num_vertices) {
+    t_parent_list **parents = malloc(num_vertices * sizeof(t_parent_list *));
+    for (int i = 0; i < num_vertices; i++) {
+        parents[i] = NULL;
+    }
+    return parents;
+}
+
+void add_parent(t_parent_list **parents, int vertex, int parent) {
+    t_parent_list *new_node = malloc(sizeof(t_parent_list));
+    new_node->parent = parent;
+    new_node->next = parents[vertex];
+    parents[vertex] = new_node;
+}
+
+void free_parents(t_parent_list **parents, int num_vertices) {
+    for (int i = 0; i < num_vertices; i++) {
+        t_parent_list *current = parents[i];
+        while (current) {
+            t_parent_list *temp = current;
+            current = current->next;
+            free(temp);
+        }
+    }
+    free(parents);
+}
+
 void pathfinder(t_graph *graph, char **name_list) {
     int num_vertices = graph->v;
     
@@ -31,18 +58,17 @@ void pathfinder(t_graph *graph, char **name_list) {
 void dijkstra(t_graph* graph, int src_idx, const char *src_name, char **name_list, bool **printed_paths) {
     int v = graph->v;
     int *dist = malloc(v * sizeof(int));
-    int *parents = malloc(v * sizeof(int));
+    t_parent_list **parents = initialize_parents(v);
     t_min_heap* min_heap = create_min_heap(v);
 
     if (!dist || !parents) {
         free(dist);
-        free(parents);
+        free_parents(parents, v);
         return;
     }
 
     for (int i = 0; i < v; i++) {
         dist[i] = INT_MAX;
-        parents[i] = -1;
     }
 
     dist[src_idx] = 0;
@@ -51,7 +77,7 @@ void dijkstra(t_graph* graph, int src_idx, const char *src_name, char **name_lis
     while (min_heap->size > 0) {
         t_min_heap_node* min_node = extract_min_node(min_heap);
         int u = min_node->v;
-     
+
         if (min_node->dist > dist[u]) {
             free(min_node);
             continue;
@@ -61,18 +87,29 @@ void dijkstra(t_graph* graph, int src_idx, const char *src_name, char **name_lis
         while (adj != NULL) {
             int v = mx_get_name_index(graph, adj->name);
             int weight = adj->weight;
+            
             if (dist[u] != INT_MAX && weight + dist[u] < dist[v]) {
                 dist[v] = weight + dist[u];
-                parents[v] = u;
+                
+                t_parent_list *temp;
+                while ((temp = parents[v]) != NULL) {
+                    parents[v] = temp->next;
+                    free(temp);
+                }
+                add_parent(parents, v, u);
+                
                 insert_min_node(min_heap, new_heap_node(v, dist[v]));
+            } else if (dist[u] != INT_MAX && weight + dist[u] == dist[v]) {
+                add_parent(parents, v, u);
             }
             adj = adj->next; 
         }
         free(min_node);
     }
+    
     print_path(graph, dist, parents, src_name, name_list, printed_paths);
     
     free(dist);
-    free(parents);
+    free_parents(parents, v);
     free_min_heap(min_heap);
 }

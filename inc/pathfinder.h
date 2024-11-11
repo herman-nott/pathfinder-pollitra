@@ -8,6 +8,7 @@ typedef struct s_graph t_graph;
 typedef struct s_min_heap t_min_heap;
 typedef struct s_min_heap_node t_min_heap_node;
 typedef struct s_adj_list t_adj_list;
+typedef struct s_parent_list t_parent_list;
 
 struct s_island {
     char *name;
@@ -37,6 +38,11 @@ struct s_min_heap_node {
     int parent;
 };
 
+struct s_parent_list {
+    int parent;
+    struct s_parent_list *next;
+};
+
 //validation
 void error_file_not_exist(const char *filename);
 void error_file_empty(const char *filename);
@@ -50,9 +56,8 @@ void validate_line(const char *line, int line_num);
 
 //printing
 void print_path_between( const char *src_name, const char *dest_name);
-void print_distance(int *distances, int dest, int *parents);
-void print_route(int *parents,int dest, char **name_list);
-void print_path(t_graph *graph, int *dist,int *parents, const char *src_name, char **name_list, bool **printed_paths);
+void print_distance_and_route(int *distances, int *path, int path_len, char **name_list);
+void print_path(t_graph *graph, int *dist, t_parent_list **parents, const char *src_name, char **name_list, bool **printed_paths);
 
 //algorithm
 void pathfinder(t_graph *graph, char **islands_names);
