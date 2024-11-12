@@ -46,13 +46,13 @@ struct s_parent_list {
 //validation
 void error_file_not_exist(const char *filename);
 void error_file_empty(const char *filename);
-void bridge_overload();
-void check_first_line(char *firstline);
+void bridge_overload(t_graph *graph, char **lines, char *filestr, char **temp_name_list, char **edge_list, char *island_to, char *island_from);
+void check_first_line(char* firstline, t_graph *graph, char **lines, char *filestr);
 void inv_number_arguments();
-void islands_number();
+void islands_number(t_graph *graph, char **lines, char *filestr, char **temp_name_list, char **edge_list);
 void is_invalid_line(int idx);
-void is_dup(const char *edge, char **edge_list, int edge_count);
-void validate_line(const char *line, int line_num);
+int is_dup(char *edge, char **edge_list, int edge_count, t_graph *graph, char **lines, char *filestr, char **temp_name_list, char *island_to, char *island_from);
+void validate_line(const char *line, int line_num, t_graph *graph, char **lines, char *filestr, char **temp_name_list, char **edge_list);
 
 //printing
 void print_path_between( const char *src_name, const char *dest_name);

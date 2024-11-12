@@ -43,25 +43,33 @@ t_graph* create_graph(int v) {
 
 void clear_islands(t_adj_list* list) {
     t_island* node = list->head;
-     while (node != NULL) {
-        mx_strdel(&node->name);
-        free(node);
+    while (node != NULL) {
+        if (node->name != NULL) {
+            mx_strdel(&node->name);
+        }
+
+        t_island* tmp = node;
         node = node->next;
+        free(tmp);
     }
     list->head = NULL;
 }
 
 void clear_graph(t_graph** graph) {
-    for (int i = 0; i < (*graph)->v; i++) {
-       clear_islands(&(*graph)->list[i]);
-    }
-    if ((*graph)->name_list != NULL) {
+    if (*graph != NULL)
+    {
         for (int i = 0; i < (*graph)->v; i++) {
-            mx_strdel(&(*graph)->name_list[i]);
+            clear_islands(&(*graph)->list[i]);
         }
-        free((*graph)->name_list);
+        if ((*graph)->name_list != NULL) {
+            for (int i = 0; i < (*graph)->v; i++) {
+                mx_strdel(&(*graph)->name_list[i]);
+            }
+            free((*graph)->name_list);
+        }
+        free((*graph)->list);
+        (*graph)->list = NULL;
+        free(*graph);
+        *graph = NULL;
     }
-    free((*graph)->list);
-    free(*graph);
-    *graph = NULL; 
 }
